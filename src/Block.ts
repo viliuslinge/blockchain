@@ -24,12 +24,12 @@ interface IBlockData {
 }
 
 export class Block implements IBlock {
-  hash: IBlock["hash"];
-  data: IBlock["data"];
-  nonce: IBlock["nonce"];
-  timestamp: IBlock["timestamp"];
-  difficulty: IBlock["difficulty"];
-  previousHash: IBlock["previousHash"];
+  hash: string;
+  data: IBlockData;
+  nonce: number;
+  timestamp: number;
+  difficulty: number;
+  previousHash: string;
 
   constructor(input: IBlock) {
     this.hash = input.hash;
@@ -53,20 +53,17 @@ export class Block implements IBlock {
     });
   }
 
-  static mineBlock(input: {
-    previousBlock: IBlock;
-    data: IBlock["data"];
-  }): Block {
+  static mineBlock(input: { previousBlock: IBlock; data: IBlockData }): Block {
     const { previousBlock, data } = input;
 
-    const previousHash: IBlock["previousHash"] = previousBlock.hash;
-    let timestamp: IBlock["timestamp"] = new Date().getTime();
-    let nonce: IBlock["nonce"] = 0;
-    let difficulty: IBlock["difficulty"] = Block.calculateDifficulty({
+    const previousHash: string = previousBlock.hash;
+    let timestamp: number = new Date().getTime();
+    let nonce: number = 0;
+    let difficulty: number = Block.calculateDifficulty({
       previousBlock,
       timestamp,
     });
-    let hash: IBlock["hash"] = generateHash();
+    let hash: string = generateHash();
 
     while (
       config.HASH_PREFIX.repeat(difficulty) !== hash.substring(0, difficulty)
@@ -97,16 +94,16 @@ export class Block implements IBlock {
     }
   }
 
-  static generateHash(input: IBlockBase): IBlock["hash"] {
+  static generateHash(input: IBlockBase): string {
     return utils.generateHash(input);
   }
 
   static calculateDifficulty(input: {
     previousBlock: IBlock;
-    timestamp: IBlock["timestamp"];
-  }): IBlock["difficulty"] {
+    timestamp: number;
+  }): number {
     const { previousBlock, timestamp } = input;
-    let result: IBlock["difficulty"] = previousBlock.difficulty;
+    let result: number = previousBlock.difficulty;
 
     if (previousBlock.timestamp + config.MINE_RATE > timestamp) {
       result += 1;
