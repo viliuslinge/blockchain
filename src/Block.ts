@@ -1,31 +1,21 @@
-const config = {
-  MIN_DIFFICULTY: 1,
-  DIFFICULTY: 2,
-  MINE_RATE: 2,
-  HASH_PREFIX: "0",
-};
-
 import * as utils from "./utils";
+import * as config from "./config";
 
-interface IBlock extends IBlockBase {
+export interface IBlock extends IBlockBase {
   hash: string;
 }
 
 interface IBlockBase {
-  data: IBlockData;
+  data: Record<string, any>;
   nonce: number;
   timestamp: number;
   difficulty: number;
   previousHash: string;
 }
 
-interface IBlockData {
-  amount: number;
-}
-
 export class Block implements IBlock {
   hash: string;
-  data: IBlockData;
+  data: IBlock["data"];
   nonce: number;
   timestamp: number;
   difficulty: number;
@@ -40,20 +30,10 @@ export class Block implements IBlock {
     this.previousHash = input.previousHash;
   }
 
-  static createGenesisBlock(): Block {
-    // TODO: implement transaction instead of data
-
-    return new Block({
-      hash: "0",
-      data: { amount: 1 },
-      nonce: 0,
-      timestamp: 0,
-      difficulty: config.DIFFICULTY,
-      previousHash: "-",
-    });
-  }
-
-  static mineBlock(input: { previousBlock: IBlock; data: IBlockData }): Block {
+  static mineBlock(input: {
+    previousBlock: IBlock;
+    data: IBlock["data"];
+  }): Block {
     const { previousBlock, data } = input;
 
     const previousHash: string = previousBlock.hash;
@@ -63,16 +43,35 @@ export class Block implements IBlock {
       previousBlock,
       timestamp,
     });
-    let hash: string = generateHash();
+    let hash: string = Block.generateHash({
+      data,
+      nonce,
+      timestamp,
+      difficulty,
+      previousHash,
+    });
+
+    console.log("mining block...");
 
     while (
       config.HASH_PREFIX.repeat(difficulty) !== hash.substring(0, difficulty)
     ) {
-      timestamp = new Date().getTime();
       nonce += 1;
-      difficulty = Block.calculateDifficulty({ previousBlock, timestamp });
-      hash = generateHash();
+      timestamp = new Date().getTime();
+      difficulty = Block.calculateDifficulty({
+        previousBlock,
+        timestamp,
+      });
+      hash = Block.generateHash({
+        data,
+        nonce,
+        timestamp,
+        difficulty,
+        previousHash,
+      });
     }
+
+    console.log("BLOCK MINED: ", hash);
 
     return new Block({
       hash,
@@ -82,20 +81,32 @@ export class Block implements IBlock {
       difficulty,
       previousHash,
     });
-
-    function generateHash() {
-      return Block.generateHash({
-        data,
-        nonce,
-        timestamp,
-        difficulty,
-        previousHash,
-      });
-    }
   }
 
-  static generateHash(input: IBlockBase): string {
-    return utils.generateHash(input);
+  static generateGenesisBlock(): Block {
+    // TODO: implement transaction instead of data
+
+    const data: IBlock["data"] = { amount: 1 };
+    const nonce: number = 0;
+    const timestamp: number = new Date().getTime();
+    const difficulty: number = config.DIFFICULTY;
+    const previousHash: string = "-";
+    const hash: string = Block.generateHash({
+      data,
+      nonce,
+      timestamp,
+      difficulty,
+      previousHash,
+    });
+
+    return new Block({
+      hash,
+      data,
+      nonce,
+      timestamp,
+      difficulty,
+      previousHash,
+    });
   }
 
   static calculateDifficulty(input: {
@@ -116,5 +127,9 @@ export class Block implements IBlock {
     }
 
     return result;
+  }
+
+  static generateHash(input: IBlockBase): string {
+    return utils.generateHash(input);
   }
 }
