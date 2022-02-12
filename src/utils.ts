@@ -1,13 +1,15 @@
 import SHA256 from "crypto-js/sha256";
+import { v4 as uuid } from "uuid";
 
-import { IBlockData } from "./types";
-
-export function calculateHash(input: Record<string, any>): string {
-  let message: string = "";
-
+export function generateHash(input: Record<string, any>): string {
+  let result: string = "";
   for (let i in input) {
-    message = message + JSON.stringify(input[i]);
+    result += JSON.stringify(input[i]);
   }
 
-  return SHA256(message).toString();
+  return SHA256(result).toString();
+}
+
+export function generateUUID(): string {
+  return uuid();
 }
