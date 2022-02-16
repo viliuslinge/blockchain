@@ -1,13 +1,37 @@
 import { Blockchain } from "./Blockchain";
+import { Transaction } from "./Transaction";
+import { Block } from "./Block";
 
-const blockchain = new Blockchain();
+const genesisBlockData: Transaction = new Transaction({ id: "genesis" });
+genesisBlockData.setInput({
+  amount: 0,
+  address: "-",
+  timestamp: new Date().getTime(),
+  signature: "-",
+});
 
-blockchain.mineBlock({
+const blockchain = new Blockchain({
+  genesisBlock: Block.generateGenesisBlock({ data: genesisBlockData }),
+});
+
+blockchain.addBlock({
   amount: 1,
 });
-blockchain.mineBlock({
+blockchain.addBlock({
   amount: 1,
 });
-blockchain.mineBlock({
+blockchain.addBlock({
+  amount: 1,
+});
+blockchain.addBlock({
+  amount: 1,
+});
+blockchain.addBlock({
+  amount: 1,
+});
+blockchain.addBlock({
+  amount: 1,
+});
+blockchain.addBlock({
   amount: 1,
 });

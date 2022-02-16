@@ -1,30 +1,30 @@
 import { Block, IBlock } from "./Block";
 
 export class Blockchain {
-  chain: Block[];
+  blocks: Block[];
 
-  constructor() {
-    this.chain = [Block.generateGenesisBlock()];
+  constructor(private input: { genesisBlock: IBlock }) {
+    this.blocks = [input.genesisBlock];
   }
 
-  addBlock(data: IBlock["data"]) {
+  addBlock(data: any) {
     const previousBlock = this.latestBlock;
     if (!previousBlock) return;
 
-    this.chain.push(Block.mineBlock({ previousBlock, data }));
+    this.blocks.push(Block.mineBlock({ previousBlock, data }));
   }
 
-  isChainValid(chain: Block[]): boolean {
-    const firstBlock: string = JSON.stringify(chain[0]);
-    const genesisBlock: string = JSON.stringify(Block.generateGenesisBlock());
+  isChainValid(blocks: Block[]): boolean {
+    const firstBlock: string = JSON.stringify(blocks[0]);
+    const genesisBlock: string = JSON.stringify(this.input.genesisBlock);
 
     if (firstBlock !== genesisBlock) {
       return false;
     }
 
-    for (let i = 1; i < chain.length; i++) {
-      const block: Block = this.chain[i];
-      const previousBlock: Block = this.chain[i - 1];
+    for (let i = 1; i < blocks.length; i++) {
+      const block: Block = this.blocks[i];
+      const previousBlock: Block = this.blocks[i - 1];
 
       if (block.hash !== Block.generateHash(block)) {
         return false;
@@ -38,21 +38,21 @@ export class Blockchain {
     return true;
   }
 
-  resetChain(chain: Block[]): boolean {
-    if (chain.length <= this.chain.length) {
+  resetChain(blocks: Block[]): boolean {
+    if (blocks.length <= this.blocks.length) {
       return false;
     }
 
-    if (!this.isChainValid(chain)) {
+    if (!this.isChainValid(blocks)) {
       return false;
     }
 
-    this.chain = chain;
+    this.blocks = blocks;
 
     return true;
   }
 
   get latestBlock(): Block | undefined {
-    return this.chain[this.chain.length - 1];
+    return this.blocks[this.blocks.length - 1];
   }
 }

@@ -6,7 +6,7 @@ export interface IBlock extends IBlockBase {
 }
 
 interface IBlockBase {
-  data: Record<string, any>;
+  data: any;
   nonce: number;
   timestamp: number;
   difficulty: number;
@@ -15,7 +15,7 @@ interface IBlockBase {
 
 export class Block implements IBlock {
   hash: string;
-  data: IBlock["data"];
+  data: any;
   nonce: number;
   timestamp: number;
   difficulty: number;
@@ -30,19 +30,12 @@ export class Block implements IBlock {
     this.previousHash = input.previousHash;
   }
 
-  static mineBlock(input: {
-    previousBlock: IBlock;
-    data: IBlock["data"];
-  }): Block {
+  static mineBlock(input: { previousBlock: IBlock; data: any }): Block {
     const { previousBlock, data } = input;
-
     const previousHash: string = previousBlock.hash;
     let timestamp: number = new Date().getTime();
     let nonce: number = 0;
-    let difficulty: number = Block.calculateDifficulty({
-      previousBlock,
-      timestamp,
-    });
+    let difficulty: number = previousBlock.difficulty;
     let hash: string = Block.generateHash({
       data,
       nonce,
@@ -83,10 +76,8 @@ export class Block implements IBlock {
     });
   }
 
-  static generateGenesisBlock(): Block {
-    // TODO: implement transaction instead of data
-
-    const data: IBlock["data"] = { amount: 1 };
+  static generateGenesisBlock(input: { data: any }): Block {
+    const { data } = input;
     const nonce: number = 0;
     const timestamp: number = new Date().getTime();
     const difficulty: number = config.DIFFICULTY;
@@ -116,7 +107,7 @@ export class Block implements IBlock {
     const { previousBlock, timestamp } = input;
     let result: number = previousBlock.difficulty;
 
-    if (previousBlock.timestamp + config.MINE_RATE > timestamp) {
+    if (previousBlock.timestamp + config.MINING_RATE > timestamp) {
       result += 1;
     } else {
       result -= 1;
