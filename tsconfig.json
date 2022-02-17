@@ -4,7 +4,7 @@
     "strictNullChecks": true,
     "moduleResolution": "node",
     "target": "es5",
-    "lib": ["ES2015", "DOM"],
+    "lib": ["ES2015"],
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",

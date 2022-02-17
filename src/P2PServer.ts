@@ -54,6 +54,7 @@ export class P2PServer {
   }) {
     this.blockchain = input.blockchain;
     this.transactionPool = input.transactionPool;
+    this.sockets = [];
     this.server = new WebSocket.Server({
       port: Number(P2PSERVER_PORT),
     });
@@ -64,7 +65,7 @@ export class P2PServer {
     this.connectToPeers();
 
     console.log(
-      `[P2P server] listening for P2P connetions on port ${P2PSERVER_PORT}`
+      `[P2P server] listening for P2P connections on port ${P2PSERVER_PORT}`
     );
   }
 
