@@ -3,7 +3,7 @@ import { Block, IBlock } from "./Block";
 export class Blockchain {
   blocks: Block[];
 
-  constructor(private input: { genesisBlock: IBlock }) {
+  constructor(private input: { genesisBlock: Block }) {
     this.blocks = [input.genesisBlock];
   }
 

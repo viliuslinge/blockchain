@@ -1,3 +1,5 @@
+import cloneDeep from "lodash/cloneDeep";
+
 import * as utils from "./utils";
 import * as config from "./config";
 
@@ -122,5 +124,16 @@ export class Block implements IBlock {
 
   static generateHash(input: IBlockBase): string {
     return utils.generateHash(input);
+  }
+
+  serialize(): IBlock {
+    return cloneDeep({
+      hash: this.hash,
+      data: this.data,
+      nonce: this.nonce,
+      timestamp: this.timestamp,
+      difficulty: this.difficulty,
+      previousHash: this.previousHash,
+    });
   }
 }

@@ -1,6 +1,14 @@
+import cloneDeep from "lodash/cloneDeep";
+
 import * as config from "./config";
 import * as utils from "./utils";
 import { Wallet } from "./Wallet";
+
+export interface ITransaction {
+  id: string;
+  input?: ITransactionInput;
+  outputs: ITransactionOutput[];
+}
 
 interface ITransactionInput {
   amount: number;
@@ -19,9 +27,10 @@ export class Transaction {
   input?: ITransactionInput;
   outputs: ITransactionOutput[];
 
-  constructor(input?: { id?: string }) {
+  constructor(input?: Partial<ITransaction>) {
     this.id = input?.id ?? utils.generateUUID();
-    this.outputs = [];
+    this.input = input?.input;
+    this.outputs = input?.outputs ?? [];
   }
 
   static withOutput(input: {
@@ -142,5 +151,13 @@ export class Transaction {
     });
 
     Transaction.sign({ senderWallet, transaction: this });
+  }
+
+  serialize(): ITransaction {
+    return cloneDeep({
+      id: this.id,
+      input: this.input,
+      outputs: this.outputs,
+    });
   }
 }
