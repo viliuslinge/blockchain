@@ -64,7 +64,7 @@ export class P2PServer {
     this.connectToPeers();
 
     console.log(
-      `[P2P server] listening por P2P connetions on ${P2PSERVER_PORT} port`
+      `[P2P server] listening for P2P connetions on port ${P2PSERVER_PORT}`
     );
   }
 
