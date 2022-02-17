@@ -7,11 +7,17 @@ export class Blockchain {
     this.blocks = [input.genesisBlock];
   }
 
-  addBlock(data: any) {
+  addBlock(data: any): Block | undefined {
     const previousBlock = this.latestBlock;
-    if (!previousBlock) return;
+    if (!previousBlock) {
+      console.error(`[Blockchain] could not add block. Missing previous block`);
+      return;
+    }
 
-    this.blocks.push(Block.mineBlock({ previousBlock, data }));
+    const block: Block = Block.mineBlock({ previousBlock, data });
+    this.blocks.push(block);
+
+    return block;
   }
 
   isChainValid(blocks: Block[]): boolean {
