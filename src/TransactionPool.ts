@@ -7,17 +7,17 @@ export class TransactionPool {
     this.transactions = [];
   }
 
-  clear() {
+  clearPool() {
     this.transactions = [];
   }
 
-  find(address: string): Transaction | undefined {
+  findTransaction(address: string): Transaction | undefined {
     return this.transactions.find((it) => {
       return it.input?.address === address;
     });
   }
 
-  addOrUpdate(transaction: Transaction) {
+  addOrUpdateTransaction(transaction: Transaction) {
     const index = this.transactions.findIndex((it) => {
       return it.id === transaction.id;
     });
@@ -35,7 +35,7 @@ export class TransactionPool {
     this.transactions.forEach((it) => {
       if (!it.input) {
         console.error(
-          `[Transaction pool] invalid transaction. Missing input address`
+          `[TRANSACTION_POOL] invalid transaction. Missing input address`
         );
         return;
       }
@@ -49,14 +49,14 @@ export class TransactionPool {
 
       if (startBalance !== outputBalance) {
         console.error(
-          `[Transaction pool] invalid transaction (balance) from address ${it.input.address}`
+          `[TRANSACTION_POOL] invalid transaction (balance) from address ${it.input.address}`
         );
         return;
       }
 
-      if (!Transaction.verify(it)) {
+      if (!Transaction.verifyTransaction(it)) {
         console.error(
-          `[Transaction pool] invalid transaction (signature) from address ${it.input.address}`
+          `[TRANSACTION_POOL] invalid transaction (signature) from address ${it.input.address}`
         );
         return;
       }

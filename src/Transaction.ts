@@ -33,7 +33,7 @@ export class Transaction {
     this.outputs = input?.outputs ?? [];
   }
 
-  static withOutput(input: {
+  static transactionWithOutput(input: {
     senderWallet: Wallet;
     outputs: ITransactionOutput[];
   }): Transaction {
@@ -41,12 +41,12 @@ export class Transaction {
     const transaction: Transaction = new Transaction();
 
     outputs.forEach((it) => transaction.addOutput(it));
-    Transaction.sign({ senderWallet, transaction });
+    Transaction.signTransaction({ senderWallet, transaction });
 
     return transaction;
   }
 
-  static create(input: {
+  static createTransaction(input: {
     senderWallet: Wallet;
     recipientAddress: string;
     amount: number;
@@ -55,7 +55,7 @@ export class Transaction {
 
     if (amount > senderWallet.balance) {
       throw new RangeError(
-        `[Transaction] amount ${amount} exceeds balance ${senderWallet.balance}`
+        `[TRANSACTION] amount ${amount} exceeds balance ${senderWallet.balance}`
       );
     }
 
@@ -70,10 +70,10 @@ export class Transaction {
       },
     ];
 
-    return Transaction.withOutput({ senderWallet, outputs });
+    return Transaction.transactionWithOutput({ senderWallet, outputs });
   }
 
-  static createReward(input: {
+  static createRewardTransaction(input: {
     minerWallet: Wallet;
     blockchainWallet: Wallet;
   }): Transaction {
@@ -90,10 +90,16 @@ export class Transaction {
       },
     ];
 
-    return Transaction.withOutput({ senderWallet: blockchainWallet, outputs });
+    return Transaction.transactionWithOutput({
+      senderWallet: blockchainWallet,
+      outputs,
+    });
   }
 
-  static sign(input: { senderWallet: Wallet; transaction: Transaction }) {
+  static signTransaction(input: {
+    senderWallet: Wallet;
+    transaction: Transaction;
+  }) {
     const { senderWallet, transaction } = input;
 
     transaction.setInput({
@@ -104,9 +110,9 @@ export class Transaction {
     });
   }
 
-  static verify(transaction: Transaction): boolean {
+  static verifyTransaction(transaction: Transaction): boolean {
     if (!transaction.input) {
-      throw new Error(`[Transaction] missing input`);
+      throw new Error(`[TRANSACTION] missing input`);
     }
 
     return utils.verifySignature({
@@ -114,14 +120,6 @@ export class Transaction {
       signature: transaction.input.signature,
       expectedHash: utils.generateHash(transaction.outputs),
     });
-  }
-
-  setInput(input: ITransactionInput) {
-    this.input = input;
-  }
-
-  addOutput(output: ITransactionOutput) {
-    this.outputs.push(output);
   }
 
   update(input: {
@@ -139,7 +137,7 @@ export class Transaction {
 
     if (amount > senderTransactionOuput.amount) {
       throw new RangeError(
-        `[Transaction] amount ${amount} exceeds balance ${senderTransactionOuput.amount}`
+        `[TRANSACTION] amount ${amount} exceeds balance ${senderTransactionOuput.amount}`
       );
     }
 
@@ -150,7 +148,7 @@ export class Transaction {
       address: recipientAddress,
     });
 
-    Transaction.sign({ senderWallet, transaction: this });
+    Transaction.signTransaction({ senderWallet, transaction: this });
   }
 
   serialize(): ITransaction {
@@ -159,5 +157,13 @@ export class Transaction {
       input: this.input,
       outputs: this.outputs,
     });
+  }
+
+  private setInput(input: ITransactionInput) {
+    this.input = input;
+  }
+
+  private addOutput(output: ITransactionOutput) {
+    this.outputs.push(output);
   }
 }

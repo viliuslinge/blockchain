@@ -1,5 +1,4 @@
-import { Block } from "./Block";
-import { Blockchain } from "./Blockchain";
+import { Block, Blockchain } from "./core";
 import { Transaction } from "./Transaction";
 import { TransactionPool } from "./TransactionPool";
 import { Wallet } from "./Wallet";
@@ -29,7 +28,7 @@ export class Miner {
     ];
 
     validTransactions.push(
-      Transaction.createReward({
+      Transaction.createRewardTransaction({
         minerWallet: this.wallet,
         blockchainWallet: Wallet.getBlockchainWallet(),
       })
@@ -40,7 +39,7 @@ export class Miner {
     if (!block) return;
 
     this.server.broadcastBlocks();
-    this.transactionPool.clear();
+    this.transactionPool.clearPool();
     this.server.broadcastCleatTransactions();
 
     return block;

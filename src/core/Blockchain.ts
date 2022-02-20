@@ -1,4 +1,4 @@
-import { Block, IBlock } from "./Block";
+import { Block } from "./Block";
 
 export class Blockchain {
   blocks: Block[];
@@ -10,7 +10,7 @@ export class Blockchain {
   addBlock(data: any): Block | undefined {
     const previousBlock = this.latestBlock;
     if (!previousBlock) {
-      console.error(`[Blockchain] could not add block. Missing previous block`);
+      console.error(`[BLOCKCHAIN] could not add block. Missing previous block`);
       return;
     }
 
@@ -20,7 +20,25 @@ export class Blockchain {
     return block;
   }
 
-  isChainValid(blocks: Block[]): boolean {
+  resetChain(blocks: Block[]): boolean {
+    if (blocks.length <= this.blocks.length) {
+      return false;
+    }
+
+    if (!this.isChainValid(blocks)) {
+      return false;
+    }
+
+    this.blocks = blocks;
+
+    return true;
+  }
+
+  get latestBlock(): Block | undefined {
+    return this.blocks[this.blocks.length - 1];
+  }
+
+  private isChainValid(blocks: Block[]): boolean {
     const firstBlock: string = JSON.stringify(blocks[0]);
     const genesisBlock: string = JSON.stringify(this.input.genesisBlock);
 
@@ -42,23 +60,5 @@ export class Blockchain {
     }
 
     return true;
-  }
-
-  resetChain(blocks: Block[]): boolean {
-    if (blocks.length <= this.blocks.length) {
-      return false;
-    }
-
-    if (!this.isChainValid(blocks)) {
-      return false;
-    }
-
-    this.blocks = blocks;
-
-    return true;
-  }
-
-  get latestBlock(): Block | undefined {
-    return this.blocks[this.blocks.length - 1];
   }
 }

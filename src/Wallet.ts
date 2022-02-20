@@ -1,10 +1,9 @@
 import * as config from "./config";
 import * as utils from "./utils";
 import { IKeyPair } from "./types";
-import { Blockchain } from "./Blockchain";
 import { Transaction } from "./Transaction";
 import { TransactionPool } from "./TransactionPool";
-import { Block } from "./Block";
+import { Block, Blockchain } from "./core";
 
 export class Wallet {
   private static blockchainWallet: Wallet;
@@ -35,7 +34,7 @@ export class Wallet {
   calculateBalance(blockchain: Blockchain): number {
     if (!blockchain.latestBlock) {
       throw new Error(
-        `[Wallet] cannot calculate balance. Missing latest block`
+        `[WALLET] cannot calculate balance. Missing latest block`
       );
     }
 
@@ -118,23 +117,23 @@ export class Wallet {
 
     if (amount > this.balance) {
       throw new RangeError(
-        `[Wallet] amount ${amount} exceeds balance ${this.balance}`
+        `[WALLET] amount ${amount} exceeds balance ${this.balance}`
       );
     }
 
-    let transaction: Transaction | undefined = transactionPool.find(
+    let transaction: Transaction | undefined = transactionPool.findTransaction(
       this.publicKey
     );
 
     if (transaction) {
       transaction.update({ senderWallet: this, recipientAddress, amount });
     } else {
-      transaction = Transaction.create({
+      transaction = Transaction.createTransaction({
         senderWallet: this,
         recipientAddress,
         amount,
       });
-      transactionPool.addOrUpdate(transaction);
+      transactionPool.addOrUpdateTransaction(transaction);
     }
 
     return transaction;

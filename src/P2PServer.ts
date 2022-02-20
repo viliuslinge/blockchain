@@ -1,9 +1,8 @@
-import { WebSocket, Server, MessageEvent } from "ws";
+import { WebSocket, Server } from "ws";
 
-import { Blockchain } from "./Blockchain";
+import { IBlock, Block, Blockchain } from "./core";
 import { Transaction, ITransaction } from "./Transaction";
 import { TransactionPool } from "./TransactionPool";
-import { Block, IBlock } from "./Block";
 
 const P2PSERVER_PORT: string = process.env.P2PSERVER_PORT || "5001";
 const peers: string[] = process.env.PEERS ? process.env.PEERS.split(",") : [];
@@ -65,80 +64,8 @@ export class P2PServer {
     this.connectToPeers();
 
     console.log(
-      `[P2P server] listening for P2P connections on port ${P2PSERVER_PORT}`
+      `[P2P_SERVER] listening for P2P connections on port ${P2PSERVER_PORT}`
     );
-  }
-
-  connectSocket(socket: WebSocket) {
-    this.sockets.push(socket);
-    console.log(`[P2P server] socket connected`);
-
-    this.initMessageHandler(socket);
-    this.sendBlocks(socket);
-  }
-
-  connectToPeers() {
-    peers.forEach((it) => {
-      const socket: WebSocket = new WebSocket(it);
-      socket.on("open", () => {
-        this.connectSocket(socket);
-      });
-    });
-  }
-
-  initMessageHandler(socket: WebSocket) {
-    socket.on("message", (data) => {
-      const event: IMessage = JSON.parse(data.toString());
-
-      switch (event.type) {
-        case IMessageType.SendBlocks: {
-          this.blockchain.resetChain(
-            event.data.blocks.map((it) => new Block(it))
-          );
-          break;
-        }
-        case IMessageType.SendTransaction: {
-          this.transactionPool.addOrUpdate(
-            new Transaction(event.data.transaction)
-          );
-          break;
-        }
-        case IMessageType.ClearAllTransactions: {
-          this.transactionPool.clear();
-          break;
-        }
-        default: {
-          throw new Error(
-            `[P2P server] unknown message type ${JSON.stringify(event)}`
-          );
-        }
-      }
-    });
-  }
-
-  sendBlocks(socket: WebSocket) {
-    this.sendMessage(socket, {
-      type: IMessageType.SendBlocks,
-      data: {
-        blocks: this.blockchain.blocks.map((it) => it.serialize()),
-      },
-    });
-  }
-
-  sendTransaction(socket: WebSocket, transaction: Transaction) {
-    this.sendMessage(socket, {
-      type: IMessageType.SendTransaction,
-      data: {
-        transaction: transaction.serialize(),
-      },
-    });
-  }
-
-  clearAllTransactions(socket: WebSocket) {
-    this.sendMessage(socket, {
-      type: IMessageType.ClearAllTransactions,
-      data: null,
-    });
   }
 
   broadcastBlocks() {
@@ -156,6 +83,78 @@ export class P2PServer {
   broadcastCleatTransactions() {
     this.sockets.forEach((it) => {
       this.clearAllTransactions(it);
+    });
+  }
+
+  private connectSocket(socket: WebSocket) {
+    this.sockets.push(socket);
+    console.log(`[P2P_SERVER] socket connected`);
+
+    this.initMessageHandler(socket);
+    this.sendBlocks(socket);
+  }
+
+  private connectToPeers() {
+    peers.forEach((it) => {
+      const socket: WebSocket = new WebSocket(it);
+      socket.on("open", () => {
+        this.connectSocket(socket);
+      });
+    });
+  }
+
+  private initMessageHandler(socket: WebSocket) {
+    socket.on("message", (data) => {
+      const event: IMessage = JSON.parse(data.toString());
+
+      switch (event.type) {
+        case IMessageType.SendBlocks: {
+          this.blockchain.resetChain(
+            event.data.blocks.map((it) => new Block(it))
+          );
+          break;
+        }
+        case IMessageType.SendTransaction: {
+          this.transactionPool.addOrUpdateTransaction(
+            new Transaction(event.data.transaction)
+          );
+          break;
+        }
+        case IMessageType.ClearAllTransactions: {
+          this.transactionPool.clearPool();
+          break;
+        }
+        default: {
+          throw new Error(
+            `[P2P_SERVER] unknown message type ${JSON.stringify(event)}`
+          );
+        }
+      }
+    });
+  }
+
+  private sendBlocks(socket: WebSocket) {
+    this.sendMessage(socket, {
+      type: IMessageType.SendBlocks,
+      data: {
+        blocks: this.blockchain.blocks.map((it) => it.serialize()),
+      },
+    });
+  }
+
+  private sendTransaction(socket: WebSocket, transaction: Transaction) {
+    this.sendMessage(socket, {
+      type: IMessageType.SendTransaction,
+      data: {
+        transaction: transaction.serialize(),
+      },
+    });
+  }
+
+  private clearAllTransactions(socket: WebSocket) {
+    this.sendMessage(socket, {
+      type: IMessageType.ClearAllTransactions,
+      data: null,
     });
   }
 

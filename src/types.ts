@@ -1,6 +1,7 @@
 import { ec } from "elliptic";
 
 export type IKeyPair = ec.KeyPair;
+
 export type ISignature = ec.Signature;
 
 export interface IBlock {

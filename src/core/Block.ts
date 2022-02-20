@@ -1,7 +1,7 @@
 import cloneDeep from "lodash/cloneDeep";
 
-import * as utils from "./utils";
-import * as config from "./config";
+import * as utils from "../utils";
+import * as config from "../config";
 
 export interface IBlock extends IBlockBase {
   hash: string;
@@ -46,8 +46,6 @@ export class Block implements IBlock {
       previousHash,
     });
 
-    console.log("mining block...");
-
     while (
       config.HASH_PREFIX.repeat(difficulty) !== hash.substring(0, difficulty)
     ) {
@@ -65,8 +63,6 @@ export class Block implements IBlock {
         previousHash,
       });
     }
-
-    console.log("BLOCK MINED: ", hash);
 
     return new Block({
       hash,
